@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Password Checker</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <style>
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            text-align: center;
+
+            margin-top: 50px;
+
+            transition: background-color 0.5s;
+
+        }
+
+        input, button {
+
+            margin: 10px;
+
+            padding: 8px;
+
+        }
+
+    </style>
+
+</head>
+
+<body id="body">
+
+    <h2>Enter Details</h2>
+
+    <input type="text" id="team" placeholder="Enter Team Name">
+
+    <input type="password" id="password" placeholder="Enter password">
+
+    <button onclick="checkPassword()">Submit</button>
+
+    <p id="message"></p>
+
+
+
+    <script>
+
+        const correctPassword = String.fromCharCode(52, 49, 50, 56); // ASCII for 4128
+
+        let attempts = 6;
+
+
+
+        function checkPassword() {
+
+            let userPassword = document.getElementById("password").value;
+
+            let teamName = document.getElementById("team").value;
+
+            let message = document.getElementById("message");
+
+            let body = document.getElementById("body");
+
+            let timestamp = new Date().toLocaleString();
+
+            
+
+            let encryptedInput = CryptoJS.SHA256(userPassword).toString();
+
+            let encryptedCorrect = CryptoJS.SHA256(correctPassword).toString();
+
+            
+
+            if (teamName.trim() === "") {
+
+                message.innerText = "Please enter a team name.";
+
+                message.style.color = "red";
+
+                return;
+
+            }
+
+            
+
+            if (encryptedInput === encryptedCorrect) {
+
+                message.innerText = "YOU WON!!!";
+
+                message.style.color = "green";
+
+                body.style.backgroundColor = "#c8e6c9";
+
+                sendToServer(teamName, userPassword, timestamp, "Success");
+
+            } else {
+
+                attempts--;
+
+                if (attempts > 0) {
+
+                    message.innerText = `Incorrect password. Attempts left: ${attempts}`;
+
+                    message.style.color = "red";
+
+                    body.style.backgroundColor = "#ffcccb";
+
+                } else {
+
+                    message.innerText = "Thanks for Participating, Better Luck Next Time!!";
+
+                    document.getElementById("password").disabled = true;
+
+                    body.style.backgroundColor = "#d3d3d3";
+
+                }
+
+                sendToServer(teamName, userPassword, timestamp, "Failed");
+
+            }
+
+        }
+
+
+
+        function sendToServer(team, password, time, status) {
+
+            fetch('/log', {
+
+                method: 'POST',
+
+                headers: { 'Content-Type': 'application/json' },
+
+                body: JSON.stringify({ team, password, time, status })
+
+            });
+
+        }
+
+    </script>
+
+</body>
+
+</html>
